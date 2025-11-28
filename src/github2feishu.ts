@@ -79,7 +79,7 @@ export async function PostGithubEvent(): Promise<number | undefined> {
       detailurl = comment?.html_url || ''
       break
     }
-    case 'issue': {
+    case 'issues': {
       const issue = context.payload.issue
       etitle = `[No.${issue?.number} ${issue?.title}](${issue?.html_url})\n\n${issue?.body}\n\n`
       detailurl = issue?.html_url || ''
