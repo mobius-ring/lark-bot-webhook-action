@@ -7,6 +7,17 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      webhook:
+        description: 手动测试时可覆盖仓库 Secrets 的 Webhook
+        required: false
+        type: string
+      signkey:
+        description: 手动测试时可覆盖仓库 Secrets 的 SignKey
+        required: false
+        type: string
+
 
 permissions:
   contents: read
