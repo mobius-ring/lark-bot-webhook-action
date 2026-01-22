@@ -18,7 +18,6 @@ on:
         required: false
         type: string
 
-
 permissions:
   contents: read
 
@@ -63,9 +62,27 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Resolve credentials
+        id: creds
+        shell: bash
+        run: |
+          # 优先使用手动输入，其次使用 secrets
+          WEBHOOK_INPUT="${{ github.event.inputs.webhook }}"
+          SIGNKEY_INPUT="${{ github.event.inputs.signkey }}"
+          if [ -n "$WEBHOOK_INPUT" ]; then
+            echo "WEBHOOK=$WEBHOOK_INPUT" >> "$GITHUB_OUTPUT"
+          else
+            echo "WEBHOOK=${{ secrets.FEISHU_BOT_WEBHOOK }}" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$SIGNKEY_INPUT" ]; then
+            echo "SIGNKEY=$SIGNKEY_INPUT" >> "$GITHUB_OUTPUT"
+          else
+            echo "SIGNKEY=${{ secrets.FEISHU_BOT_SIGNKEY }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
-          signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
+          webhook: ${{ steps.creds.outputs.WEBHOOK }}
+          signkey: ${{ steps.creds.outputs.SIGNKEY }}
