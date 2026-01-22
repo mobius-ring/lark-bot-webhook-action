@@ -81,7 +81,7 @@ export function BuildGithubTrendingCard(
     card: {
       type: 'template',
       data: {
-        template_id: 'AAqkpVra76ijV',
+        template_id: 'AAqvNGMODBhsa',
         template_version_name: '1.0.0',
         template_variable: {
           object_list_1: repos
