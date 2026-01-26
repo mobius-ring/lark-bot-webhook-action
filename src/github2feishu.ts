@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { context } from '@actions/github'
 import getTrending from './trend'
 import { sign_with_timestamp, PostToFeishu } from './feishu'
-import { BuildGithubTrendingCard, BuildGithubNotificationCard } from './card'
+import { BuildGithubTrendingCard, BuildGithubNotificationCard, BuildGithubReleaseCard } from './card'
 
 async function PostGithubTrending(
   webhookId: string,
@@ -117,12 +117,12 @@ export async function PostGithubEvent(): Promise<number | undefined> {
       const ptext =
         context.payload['ref'].indexOf('refs/tags/') !== -1
           ? `tag: ${context.payload['ref'].slice(
-              context.payload['ref'].indexOf('refs/tags/') + 10
-            )}`
+            context.payload['ref'].indexOf('refs/tags/') + 10
+          )}`
           : context.payload['ref'].indexOf('refs/heads/') !== -1
             ? `branch: ${context.payload['ref'].slice(
-                context.payload['ref'].indexOf('refs/heads/') + 11
-              )}`
+              context.payload['ref'].indexOf('refs/heads/') + 11
+            )}`
             : ''
       etitle = `${ptext}\n\nCommits: [${head_commit['id']}](${head_commit['url']})\n\n${head_commit['message']}`
       status =
@@ -141,7 +141,15 @@ export async function PostGithubEvent(): Promise<number | undefined> {
       etitle = `${release['name']}\n${release['body']}\n${release['tag_name']}${release['prerelease'] === true ? '  prerelease' : ''}`
       status = context.payload.action || 'published'
       detailurl = release['html_url']
-      break
+
+      console.log("================================================")
+      console.log(context)
+      console.log("================================================")
+      console.log(release)
+
+      const cardmsg = BuildGithubReleaseCard(tm, sign, release['html_url'], release['tag_name'], release['published_at'], release['body'], release['author']['login'])
+      console.log(cardmsg)
+      return PostToFeishu(webhookId, cardmsg)
     }
     case 'repository_dispatch':
       break
