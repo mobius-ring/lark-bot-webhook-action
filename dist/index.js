@@ -43933,6 +43933,7 @@ async function PostGithubEvent() {
         ? core.getInput('signkey')
         : process.env.FEISHU_BOT_SIGNKEY || '';
     const payload = github_1.context.payload || {};
+    console.log(`=====================${github_1.context.eventName}===========================`);
     console.log(payload);
     const webhookId = webhook.slice(webhook.indexOf('hook/') + 5);
     const tm = Math.floor(Date.now() / 1000);
