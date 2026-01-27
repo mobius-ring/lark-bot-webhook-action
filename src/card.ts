@@ -149,9 +149,7 @@ export function BuildGithubTrendingCard(
 
 export function BuildGithubReleaseCard(tm: number, sign: string, release: GitHubRelease): string {
 
-  console.log("================================================")
-  console.log(release)
-  console.log("================================================")
+
   const rcard: CardMessage = {
     timestamp: `${tm}`,
     sign,
@@ -160,7 +158,7 @@ export function BuildGithubReleaseCard(tm: number, sign: string, release: GitHub
       type: 'template',
       data: {
         template_id: 'AAqvNGMODBhsa',
-        template_version_name: '1.2.2',
+        template_version_name: '1.2.3',
         template_variable: {
           release_version: release.tag_name,
           release_time: release.published_at,

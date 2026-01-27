@@ -43774,9 +43774,6 @@ function BuildGithubTrendingCard(tm, sign, repos) {
     return JSON.stringify(tcard);
 }
 function BuildGithubReleaseCard(tm, sign, release) {
-    console.log("================================================");
-    console.log(release);
-    console.log("================================================");
     const rcard = {
         timestamp: `${tm}`,
         sign,
@@ -43785,7 +43782,7 @@ function BuildGithubReleaseCard(tm, sign, release) {
             type: 'template',
             data: {
                 template_id: 'AAqvNGMODBhsa',
-                template_version_name: '1.2.2',
+                template_version_name: '1.2.3',
                 template_variable: {
                     release_version: release.tag_name,
                     release_time: release.published_at,
@@ -43933,7 +43930,6 @@ async function PostGithubEvent() {
         ? core.getInput('signkey')
         : process.env.FEISHU_BOT_SIGNKEY || '';
     const payload = github_1.context.payload || {};
-    console.log(`=====================${github_1.context.eventName}===========================`);
     console.log(payload);
     const webhookId = webhook.slice(webhook.indexOf('hook/') + 5);
     const tm = Math.floor(Date.now() / 1000);
