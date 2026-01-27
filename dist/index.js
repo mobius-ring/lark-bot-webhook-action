@@ -43785,7 +43785,7 @@ function BuildGithubReleaseCard(tm, sign, release) {
                 template_version_name: '1.2.3',
                 template_variable: {
                     release_version: release.tag_name,
-                    release_time: release.published_at,
+                    release_time: new Date(release.published_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
                     release_logs: release.body,
                     release_user: release.author.login,
                     release_url: release.html_url,
@@ -43799,87 +43799,7 @@ function BuildGithubReleaseCard(tm, sign, release) {
 
 /***/ }),
 
-/***/ 3026:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sign_with_timestamp = sign_with_timestamp;
-exports.PostToFeishu = PostToFeishu;
-const https = __importStar(__nccwpck_require__(5687));
-const crypto = __importStar(__nccwpck_require__(6113));
-const core = __importStar(__nccwpck_require__(2186));
-function sign_with_timestamp(timestamp, key) {
-    const toencstr = `${timestamp}\n${key}`;
-    const signature = crypto.createHmac('SHA256', toencstr).digest('base64');
-    return signature;
-}
-async function PostToFeishu(id, content) {
-    return new Promise((resolve, reject) => {
-        const options = {
-            hostname: 'open.feishu.cn',
-            port: 443,
-            path: `/open-apis/bot/v2/hook/${id}`,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-        const req = https.request(options, res => {
-            const statusCode = res.statusCode;
-            res.on('data', d => {
-                process.stdout.write(d);
-                const result = d.toString();
-                try {
-                    const json = JSON.parse(result);
-                    core.debug(json.code);
-                    core.debug(json.msg);
-                }
-                catch (err) {
-                    console.log(err);
-                }
-            });
-            res.on('end', () => {
-                resolve(statusCode);
-            });
-        });
-        req.on('error', e => {
-            console.error(e);
-            reject(e);
-        });
-        req.write(content);
-        req.end();
-    });
-}
-
-
-/***/ }),
-
-/***/ 3221:
+/***/ 8889:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -43915,28 +43835,28 @@ exports.PostGithubEvent = PostGithubEvent;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const trend_1 = __importDefault(__nccwpck_require__(4904));
-const feishu_1 = __nccwpck_require__(3026);
+const lark_1 = __nccwpck_require__(1003);
 const card_1 = __nccwpck_require__(4647);
 async function PostGithubTrending(webhookId, timestamp, sign) {
     const trend = await (0, trend_1.default)();
     const cardmsg = (0, card_1.BuildGithubTrendingCard)(timestamp, sign, trend);
-    return (0, feishu_1.PostToFeishu)(webhookId, cardmsg);
+    return (0, lark_1.PostToLark)(webhookId, cardmsg);
 }
 async function PostGithubEvent() {
     const webhook = core.getInput('webhook')
         ? core.getInput('webhook')
-        : process.env.FEISHU_BOT_WEBHOOK || '';
+        : process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || '';
     const signKey = core.getInput('signkey')
         ? core.getInput('signkey')
-        : process.env.FEISHU_BOT_SIGNKEY || '';
+        : process.env.LARK_BOT_SIGNKEY || process.env.FEISHU_BOT_SIGNKEY || '';
     const payload = github_1.context.payload || {};
     console.log(payload);
     const webhookId = webhook.slice(webhook.indexOf('hook/') + 5);
     const tm = Math.floor(Date.now() / 1000);
-    const sign = (0, feishu_1.sign_with_timestamp)(tm, signKey);
+    const sign = (0, lark_1.sign_with_timestamp)(tm, signKey);
     const actor = github_1.context.actor;
     const eventType = github_1.context.eventName;
-    const repo = github_1.context.payload.repository?.name || 'junka';
+    const repo = github_1.context.payload.repository?.name || 'mobius-ring';
     let status = github_1.context.payload.action || 'closed';
     let etitle = github_1.context.payload.issue?.html_url ||
         github_1.context.payload.pull_request?.html_url ||
@@ -44041,7 +43961,7 @@ async function PostGithubEvent() {
             status = github_1.context.payload.action || 'published';
             detailurl = release['html_url'];
             const cardmsg = (0, card_1.BuildGithubReleaseCard)(tm, sign, release);
-            return (0, feishu_1.PostToFeishu)(webhookId, cardmsg);
+            return (0, lark_1.PostToLark)(webhookId, cardmsg);
         }
         case 'repository_dispatch':
             break;
@@ -44066,7 +43986,87 @@ async function PostGithubEvent() {
     }
     const color = 'blue';
     const cardmsg = (0, card_1.BuildGithubNotificationCard)(tm, sign, repo, eventType, color, actor, status, etitle, detailurl);
-    return (0, feishu_1.PostToFeishu)(webhookId, cardmsg);
+    return (0, lark_1.PostToLark)(webhookId, cardmsg);
+}
+
+
+/***/ }),
+
+/***/ 1003:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sign_with_timestamp = sign_with_timestamp;
+exports.PostToLark = PostToLark;
+const https = __importStar(__nccwpck_require__(5687));
+const crypto = __importStar(__nccwpck_require__(6113));
+const core = __importStar(__nccwpck_require__(2186));
+function sign_with_timestamp(timestamp, key) {
+    const toencstr = `${timestamp}\n${key}`;
+    const signature = crypto.createHmac('SHA256', toencstr).digest('base64');
+    return signature;
+}
+async function PostToLark(id, content) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            hostname: 'open.feishu.cn',
+            port: 443,
+            path: `/open-apis/bot/v2/hook/${id}`,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        const req = https.request(options, res => {
+            const statusCode = res.statusCode;
+            res.on('data', d => {
+                process.stdout.write(d);
+                const result = d.toString();
+                try {
+                    const json = JSON.parse(result);
+                    core.debug(json.code);
+                    core.debug(json.msg);
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            });
+            res.on('end', () => {
+                resolve(statusCode);
+            });
+        });
+        req.on('error', e => {
+            console.error(e);
+            reject(e);
+        });
+        req.write(content);
+        req.end();
+    });
 }
 
 
@@ -59295,8 +59295,8 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const github2feishu_1 = __nccwpck_require__(3221);
-(0, github2feishu_1.PostGithubEvent)();
+const github2lark_1 = __nccwpck_require__(8889);
+(0, github2lark_1.PostGithubEvent)();
 
 })();
 

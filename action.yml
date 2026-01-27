@@ -1,12 +1,12 @@
-name: 'Github Events To Feishu Bot Action'
-description: 'send message to feishu bot'
-author: 'junka'
+name: 'Github Events To Lark Bot Action'
+description: 'send message to lark bot'
+author: 'mobius-ring'
 branding:
   icon: 'cloud-snow'
   color: 'blue'
 inputs:
   webhook:
-    description: 'feishu bot webhook url'
+    description: 'lark bot webhook url'
     required: true
   signkey:
     description: 'set when you enable signature verify'

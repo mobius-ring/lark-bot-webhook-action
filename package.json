@@ -1,10 +1,10 @@
 {
-  "name": "feishu-bot-webhook-action",
+  "name": "lark-bot-webhook-action",
   "version": "1.0.12",
-  "description": "call webhook for custom feishu bot",
+  "description": "call webhook for custom lark bot",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/junka/feishu-bot-webhook-action.git"
+    "url": "git+https://github.com/mobius-ring/lark-bot-webhook-action.git"
   },
   "main": "dist/index.js",
   "exports": {
@@ -26,11 +26,10 @@
   },
   "keywords": [
     "bot",
-    "feishu",
     "lark",
     "trending"
   ],
-  "author": "junka",
+  "author": "mobius-ring",
   "license": "ISC",
   "jest": {
     "preset": "ts-jest",

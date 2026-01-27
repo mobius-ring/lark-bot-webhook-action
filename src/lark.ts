@@ -8,7 +8,7 @@ export function sign_with_timestamp(timestamp: number, key: string): string {
   return signature
 }
 
-export async function PostToFeishu(
+export async function PostToLark(
   id: string,
   content: string
 ): Promise<number | undefined> {

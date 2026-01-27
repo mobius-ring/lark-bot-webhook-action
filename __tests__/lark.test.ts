@@ -1,4 +1,4 @@
-import { sign_with_timestamp, PostToFeishu } from '../src/feishu'
+import { sign_with_timestamp, PostToLark } from '../src/lark'
 import * as core from '@actions/core'
 import * as dotenv from 'dotenv'
 
@@ -8,7 +8,7 @@ const debugMock: jest.SpiedFunction<typeof core.debug> = jest
   .spyOn(core, 'debug')
   .mockImplementation()
 
-describe('feishu', () => {
+describe('lark', () => {
   it('signature', async () => {
     const signKey = 'dGhpcyBpcyBhIGtleQ=='
     const tm = 1716283459
@@ -18,9 +18,9 @@ describe('feishu', () => {
 
   it('fail to send txt msg with no signature', async () => {
     const msg = `{ "msg_type":"text","content":{"text":"request example"}}`
-    const webhook = process.env.FEISHU_BOT_WEBHOOK || ''
+    const webhook = process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || ''
     const webhookId = webhook.slice(webhook.indexOf('hook/') + 5)
-    const ret = await PostToFeishu(webhookId, msg)
+    const ret = await PostToLark(webhookId, msg)
     expect(ret).toEqual(200)
     expect(debugMock).toHaveBeenNthCalledWith(1, 19021)
     expect(debugMock).toHaveBeenNthCalledWith(
@@ -31,8 +31,8 @@ describe('feishu', () => {
   /*
   it("send txt msg ok", async () => {
     const tm = Math.floor(Date.now() / 1000);
-    const key = process.env.FEISHU_BOT_SIGNKEY || "";
-    const webhook = process.env.FEISHU_BOT_WEBHOOK || "";
+    const key = process.env.LARK_BOT_SIGNKEY || process.env.FEISHU_BOT_SIGNKEY || "";
+    const webhook = process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || "";
     const webhookId = webhook.slice(webhook.indexOf("hook/") + 5);
     const sign = sign_with_timestamp(tm, key);
     const msg = `{
@@ -41,7 +41,7 @@ describe('feishu', () => {
             "msg_type":"text","content":{"text":"request example"}
         }`;
     console.log(msg);
-    const ret = await PostToFeishu(webhookId, msg);
+    const ret = await PostToLark(webhookId, msg);
     expect(ret).toEqual(200);
   });
   */

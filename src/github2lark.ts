@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import getTrending from './trend'
-import { sign_with_timestamp, PostToFeishu } from './feishu'
+import { sign_with_timestamp, PostToLark } from './lark'
 import { BuildGithubTrendingCard, BuildGithubNotificationCard, BuildGithubReleaseCard } from './card'
 
 async function PostGithubTrending(
@@ -11,16 +11,16 @@ async function PostGithubTrending(
 ): Promise<number | undefined> {
   const trend = await getTrending()
   const cardmsg = BuildGithubTrendingCard(timestamp, sign, trend)
-  return PostToFeishu(webhookId, cardmsg)
+  return PostToLark(webhookId, cardmsg)
 }
 
 export async function PostGithubEvent(): Promise<number | undefined> {
   const webhook = core.getInput('webhook')
     ? core.getInput('webhook')
-    : process.env.FEISHU_BOT_WEBHOOK || ''
+    : process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || ''
   const signKey = core.getInput('signkey')
     ? core.getInput('signkey')
-    : process.env.FEISHU_BOT_SIGNKEY || ''
+    : process.env.LARK_BOT_SIGNKEY || process.env.FEISHU_BOT_SIGNKEY || ''
 
   const payload = context.payload || {}
   console.log(payload)
@@ -31,7 +31,7 @@ export async function PostGithubEvent(): Promise<number | undefined> {
 
   const actor = context.actor
   const eventType = context.eventName
-  const repo = context.payload.repository?.name || 'junka'
+  const repo = context.payload.repository?.name || 'mobius-ring'
   let status = context.payload.action || 'closed'
   let etitle =
     context.payload.issue?.html_url ||
@@ -144,7 +144,7 @@ export async function PostGithubEvent(): Promise<number | undefined> {
 
 
       const cardmsg = BuildGithubReleaseCard(tm, sign, release)
-      return PostToFeishu(webhookId, cardmsg)
+      return PostToLark(webhookId, cardmsg)
     }
     case 'repository_dispatch':
       break
@@ -181,5 +181,5 @@ export async function PostGithubEvent(): Promise<number | undefined> {
     etitle,
     detailurl
   )
-  return PostToFeishu(webhookId, cardmsg)
+  return PostToLark(webhookId, cardmsg)
 }

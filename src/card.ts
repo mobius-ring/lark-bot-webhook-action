@@ -161,7 +161,7 @@ export function BuildGithubReleaseCard(tm: number, sign: string, release: GitHub
         template_version_name: '1.2.3',
         template_variable: {
           release_version: release.tag_name,
-          release_time: release.published_at,
+          release_time: new Date(release.published_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
           release_logs: release.body,
           release_user: release.author.login,
           release_url: release.html_url,

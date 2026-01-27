@@ -1,37 +1,43 @@
 import { BuildGithubReleaseCard } from '../src/card'
-import { sign_with_timestamp, PostToFeishu } from '../src/feishu'
+import { sign_with_timestamp, PostToLark } from '../src/lark'
 import * as core from '@actions/core'
 import * as dotenv from 'dotenv'
 import * as https from 'https'
 
 dotenv.config({ path: ['.env.local'] })
 
-const debugMock: jest.SpiedFunction<typeof core.debug> = jest
-  .spyOn(core, 'debug')
-  .mockImplementation()
+// Mock https module at the top level
+const mockRequest = {
+  write: jest.fn(),
+  end: jest.fn(),
+  on: jest.fn()
+}
 
-const httpsRequestMock = jest.spyOn(https, 'request').mockImplementation(
-  () => {
-    const mockResponse = {
-      statusCode: 200,
-      on: jest.fn((event: string, callback: (data: any) => void) => {
-        if (event === 'data') {
-          callback(Buffer.from('{"code": 19021, "msg": "sign match fail or timestamp is not within one hour from current time"}'))
-        } else if (event === 'end') {
-          callback(null)
-        }
-      })
+const mockResponse = {
+  statusCode: 200,
+  on: jest.fn((event: string, callback: (data: any) => void) => {
+    if (event === 'data') {
+      callback(Buffer.from('{"code": 19021, "msg": "sign match fail or timestamp is not within one hour from current time"}'))
+    } else if (event === 'end') {
+      callback(null)
     }
-    const mockRequest = {
-      write: jest.fn(),
-      end: jest.fn(),
-      on: jest.fn()
-    }
-    return mockRequest as any
-  }
-)
+  })
+}
+
+jest.mock('https', () => ({
+  request: jest.fn((options: any, cb: any) => {
+    cb(mockResponse)
+    return mockRequest
+  })
+}))
 
 describe('card', () => {
+  let debugMock: jest.SpiedFunction<typeof core.debug>
+
+  beforeEach(() => {
+    debugMock = jest.spyOn(core, 'debug').mockImplementation()
+  })
+
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -92,10 +98,10 @@ describe('card', () => {
         type: 'template',
         data: {
           template_id: 'AAqvNGMODBhsa',
-          template_version_name: '1.2.2',
+          template_version_name: '1.2.3',
           template_variable: {
             release_version: '3',
-            release_time: '2026-01-27T03:04:50Z',
+            release_time: '2026/1/27 11:04:50',
             release_logs: ' zhuyaoneirong ',
             release_user: 'Liz2Z',
             release_url: 'https://github.com/mobius-ring/lark-bot-webhook-action/releases/tag/3'
@@ -162,10 +168,10 @@ describe('card', () => {
         type: 'template',
         data: {
           template_id: 'AAqvNGMODBhsa',
-          template_version_name: '1.2.2',
+          template_version_name: '1.2.3',
           template_variable: {
             release_version: 'v1.0.0',
-            release_time: '2026-01-01T00:00:00Z',
+            release_time: '2026/1/1 08:00:00',
             release_logs: 'Release notes',
             release_user: 'testuser',
             release_url: 'https://github.com/test/repo/releases/tag/v1.0.0'
@@ -176,7 +182,7 @@ describe('card', () => {
   })
 
   describe('send release card', () => {
-    it('send release card to feishu without signature should fail', async () => {
+    it('send release card to lark without signature should fail', async () => {
       const tm = Math.floor(Date.now() / 1000)
       const release = {
         assets: [],
@@ -222,9 +228,9 @@ describe('card', () => {
       }
 
       const cardMsg = BuildGithubReleaseCard(tm, '', release)
-      const webhook = process.env.FEISHU_BOT_WEBHOOK || ''
+      const webhook = process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || ''
       const webhookId = webhook.slice(webhook.indexOf('hook/') + 5)
-      const ret = await PostToFeishu(webhookId, cardMsg)
+      const ret = await PostToLark(webhookId, cardMsg)
       expect(ret).toEqual(200)
       expect(debugMock).toHaveBeenNthCalledWith(1, 19021)
       expect(debugMock).toHaveBeenNthCalledWith(
@@ -236,7 +242,7 @@ describe('card', () => {
     /*
     it('send release card with valid signature', async () => {
       const tm = Math.floor(Date.now() / 1000)
-      const signKey = process.env.FEISHU_BOT_SIGNKEY || ''
+      const signKey = process.env.LARK_BOT_SIGNKEY || process.env.FEISHU_BOT_SIGNKEY || ''
       const sign = sign_with_timestamp(tm, signKey)
       const release = {
         assets: [],
@@ -282,9 +288,9 @@ describe('card', () => {
       }
 
       const cardMsg = BuildGithubReleaseCard(tm, sign, release)
-      const webhook = process.env.FEISHU_BOT_WEBHOOK || ''
+      const webhook = process.env.LARK_BOT_WEBHOOK || process.env.FEISHU_BOT_WEBHOOK || ''
       const webhookId = webhook.slice(webhook.indexOf('hook/') + 5)
-      const ret = await PostToFeishu(webhookId, cardMsg)
+      const ret = await PostToLark(webhookId, cardMsg)
       expect(ret).toEqual(200)
     })
     */

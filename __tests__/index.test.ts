@@ -1,7 +1,7 @@
 /**
  * Unit tests for the action's entrypoint, src/index.ts
  */
-import * as main from '../src/github2feishu'
+import * as main from '../src/github2lark'
 
 // Mock the action's entrypoint
 const runMock = jest.spyOn(main, 'PostGithubEvent').mockImplementation()
