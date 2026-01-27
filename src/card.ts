@@ -149,6 +149,9 @@ export function BuildGithubTrendingCard(
 
 export function BuildGithubReleaseCard(tm: number, sign: string, release: GitHubRelease): string {
 
+  console.log("================================================")
+  console.log(release)
+  console.log("================================================")
   const rcard: CardMessage = {
     timestamp: `${tm}`,
     sign,
