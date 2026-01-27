@@ -1,4 +1,13 @@
 import { BuildGithubReleaseCard } from '../src/card'
+import { sign_with_timestamp, PostToFeishu } from '../src/feishu'
+import * as core from '@actions/core'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: ['.env.local'] })
+
+const debugMock: jest.SpiedFunction<typeof core.debug> = jest
+  .spyOn(core, 'debug')
+  .mockImplementation()
 
 describe('card', () => {
   it('BuildGithubReleaseCard with release data', () => {

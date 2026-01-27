@@ -43773,7 +43773,10 @@ function BuildGithubTrendingCard(tm, sign, repos) {
     };
     return JSON.stringify(tcard);
 }
-function BuildGithubReleaseCard(tm, sign, release_url, release_version, release_time, logs, release_user) {
+function BuildGithubReleaseCard(tm, sign, release) {
+    console.log("================================================");
+    console.log(release);
+    console.log("================================================");
     const rcard = {
         timestamp: `${tm}`,
         sign,
@@ -43782,13 +43785,13 @@ function BuildGithubReleaseCard(tm, sign, release_url, release_version, release_
             type: 'template',
             data: {
                 template_id: 'AAqvNGMODBhsa',
-                template_version_name: '1.2.1',
+                template_version_name: '1.2.2',
                 template_variable: {
-                    release_url: release_url,
-                    version: release_version,
-                    release_time: release_time,
-                    logs: logs,
-                    release_user: release_user
+                    release_version: release.tag_name,
+                    release_time: release.published_at,
+                    release_logs: release.body,
+                    release_user: release.author.login,
+                    release_url: release.html_url,
                 }
             }
         }
@@ -43930,8 +43933,6 @@ async function PostGithubEvent() {
         ? core.getInput('signkey')
         : process.env.FEISHU_BOT_SIGNKEY || '';
     const payload = github_1.context.payload || {};
-    console.log("================================================");
-    console.log(github_1.context.eventName);
     console.log(payload);
     const webhookId = webhook.slice(webhook.indexOf('hook/') + 5);
     const tm = Math.floor(Date.now() / 1000);
@@ -44042,12 +44043,7 @@ async function PostGithubEvent() {
             etitle = `${release['name']}\n${release['body']}\n${release['tag_name']}${release['prerelease'] === true ? '  prerelease' : ''}`;
             status = github_1.context.payload.action || 'published';
             detailurl = release['html_url'];
-            console.log("================================================");
-            console.log(github_1.context);
-            console.log("================================================");
-            console.log(release);
-            const cardmsg = (0, card_1.BuildGithubReleaseCard)(tm, sign, release['html_url'], release['tag_name'], release['published_at'], release['body'], release['author']['login']);
-            console.log(cardmsg);
+            const cardmsg = (0, card_1.BuildGithubReleaseCard)(tm, sign, release);
             return (0, feishu_1.PostToFeishu)(webhookId, cardmsg);
         }
         case 'repository_dispatch':
