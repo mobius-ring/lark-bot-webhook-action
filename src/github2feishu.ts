@@ -23,8 +23,6 @@ export async function PostGithubEvent(): Promise<number | undefined> {
     : process.env.FEISHU_BOT_SIGNKEY || ''
 
   const payload = context.payload || {}
-  console.log("================================================")
-  console.log(context.eventName)
   console.log(payload)
 
   const webhookId = webhook.slice(webhook.indexOf('hook/') + 5)
@@ -144,13 +142,8 @@ export async function PostGithubEvent(): Promise<number | undefined> {
       status = context.payload.action || 'published'
       detailurl = release['html_url']
 
-      console.log("================================================")
-      console.log(context)
-      console.log("================================================")
-      console.log(release)
 
-      const cardmsg = BuildGithubReleaseCard(tm, sign, release['html_url'], release['tag_name'], release['published_at'], release['body'], release['author']['login'])
-      console.log(cardmsg)
+      const cardmsg = BuildGithubReleaseCard(tm, sign, release)
       return PostToFeishu(webhookId, cardmsg)
     }
     case 'repository_dispatch':

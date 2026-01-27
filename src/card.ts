@@ -15,12 +15,57 @@ type TrendingCard = {
   object_list_1: Repository[]
 }
 
+type GitHubUser = {
+  avatar_url: string
+  events_url: string
+  followers_url: string
+  following_url: string
+  gists_url: string
+  gravatar_id: string
+  html_url: string
+  id: number
+  login: string
+  node_id: string
+  organizations_url: string
+  received_events_url: string
+  repos_url: string
+  site_admin: boolean
+  starred_url: string
+  subscriptions_url: string
+  type: string
+  url: string
+  user_view_type: string
+}
+
+type GitHubRelease = {
+  assets: any[]
+  assets_url: string
+  author: GitHubUser
+  body: string
+  created_at: string
+  draft: boolean
+  html_url: string
+  id: number
+  immutable: boolean
+  name: string
+  node_id: string
+  prerelease: boolean
+  published_at: string
+  tag_name: string
+  tarball_url: string
+  target_commitish: string
+  updated_at: string
+  upload_url: string
+  url: string
+  zipball_url: string
+}
+
 type ReleaseCard = {
-  release_url: string,
-  version: string
+  release_version: string;
   release_time: string;
-  logs: string;
+  release_logs: string;
   release_user: string;
+  release_url: string;
 }
 
 type CardData = {
@@ -102,7 +147,8 @@ export function BuildGithubTrendingCard(
 }
 
 
-export function BuildGithubReleaseCard(tm: number, sign: string, release_url: string, release_version: string, release_time: string, logs: string, release_user: string): string {
+export function BuildGithubReleaseCard(tm: number, sign: string, release: GitHubRelease): string {
+
   const rcard: CardMessage = {
     timestamp: `${tm}`,
     sign,
@@ -111,14 +157,13 @@ export function BuildGithubReleaseCard(tm: number, sign: string, release_url: st
       type: 'template',
       data: {
         template_id: 'AAqvNGMODBhsa',
-        template_version_name: '1.2.1',
+        template_version_name: '1.2.2',
         template_variable: {
-          release_url: release_url,
-          version: release_version,
-          release_time: release_time,
-          logs: logs,
-          release_user: release_user
-
+          release_version: release.tag_name,
+          release_time: release.published_at,
+          release_logs: release.body,
+          release_user: release.author.login,
+          release_url: release.html_url,
         }
       }
     }
